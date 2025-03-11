@@ -1,6 +1,7 @@
 package com.inventory.Erp.Services;
 
 import com.inventory.Erp.ExeceptionsHandler.InsufficientStockException;
+import com.inventory.Erp.ExeceptionsHandler.ResourceNotFoundException;
 import com.inventory.Erp.Repository.CustomerRepository;
 import com.inventory.Erp.Repository.ProductRepository;
 import com.inventory.Erp.Repository.SalesOrderRepository;
@@ -30,7 +31,7 @@ public class SalesOrderService {
     public List<SalesOrder> getAllSalesOrders() {
         List<SalesOrder> fetchOrderList = salesOrderRepository.findAll();
         if(fetchOrderList.isEmpty()){
-            throw new RuntimeException("No record found");
+            throw new ResourceNotFoundException("No record found");
         }
         return fetchOrderList;
     }
@@ -54,7 +55,7 @@ public class SalesOrderService {
     public SalesOrder updateSalesOrder(long salesOrderId, SalesOrder salesOrderDetails) {
           Optional<SalesOrder> updateSalesOrder = salesOrderRepository.findById(salesOrderId);
           if(!updateSalesOrder.isPresent()){
-              throw new RuntimeException("Transaction not found");
+              throw new ResourceNotFoundException("Transaction not found");
           }
             SalesOrder existingOrder = updateSalesOrder.get();
             existingOrder.setOrderDate(salesOrderDetails.getOrderDate());
@@ -63,6 +64,9 @@ public class SalesOrderService {
             existingOrder.setQuantity(salesOrderDetails.getQuantity());
             existingOrder.setUnitprice(salesOrderDetails.getUnitprice());
             existingOrder.setVat(salesOrderDetails.getVat());
+            existingOrder.setStatus(existingOrder.getStatus());
+            calculateTotalAmount(existingOrder);
+            isStockAvailable(existingOrder);
             return salesOrderRepository.save(existingOrder);
 
     }
@@ -80,12 +84,10 @@ public class SalesOrderService {
         double price = totalWithVAT - discountAllowed;
         return price;
     }
-
     public void deleteSalesOrder(long id) {
         SalesOrder salesOrder = salesOrderRepository.findById(id).orElseThrow(() -> new RuntimeException("SalesOrder with id " + id + " not found"));
         salesOrderRepository.delete(salesOrder);
     }
-
     public SalesOrder getSalesOrderById(long id) {
         return salesOrderRepository.findById(id).orElseThrow(() -> new RuntimeException("No record With " + id + "  found"));
     }
