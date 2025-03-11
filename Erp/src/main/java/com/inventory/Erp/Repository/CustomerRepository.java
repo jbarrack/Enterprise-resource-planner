@@ -12,4 +12,5 @@ public interface CustomerRepository extends JpaRepository<Customer, Integer> {
     List<Customer> findByActive(boolean active);
     Optional<Customer> findCustomerByEmail(String email);
     Optional<Customer> findCustomerByContact(String contact);
+    Optional<Customer> findCustomerByEmailAndContact(String email,String contact);
 }

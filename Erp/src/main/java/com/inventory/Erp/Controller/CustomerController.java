@@ -1,6 +1,7 @@
 package com.inventory.Erp.Controller;
 
 import ch.qos.logback.core.joran.spi.HttpUtil;
+import com.inventory.Erp.ExeceptionsHandler.ResourceNotFoundException;
 import com.inventory.Erp.Services.CustomerService;
 import com.inventory.Erp.model.Customer;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,7 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-@CrossOrigin("http://localhost:3000")
+@CrossOrigin("*")
 @RestController
 @RequestMapping("/api/customers")
 public class CustomerController {
@@ -34,14 +35,15 @@ public class CustomerController {
         Customer createNewCustomer = customerService.createNewCustomer(customer);
         return new ResponseEntity<>(createNewCustomer, HttpStatus.CREATED);
     }
-    @RequestMapping(value = "/updateCustomer/{id}",method = RequestMethod.PUT)
-    public ResponseEntity<Customer> updateCustomer(@PathVariable("id") int id, @RequestBody Customer customerDetails) {
-        Customer upateCustomerRecords = customerService.updateCustomer(id,customerDetails);
-        return new ResponseEntity<>(upateCustomerRecords, HttpStatus.OK);
+    public ResponseEntity<Customer> updateCustomer(@PathVariable("id") int id, @RequestBody Customer customerDetails) throws Exception {
+        Customer updatedCustomer = customerService.updateCustomer(id, customerDetails);
+        return new ResponseEntity<>(updatedCustomer, HttpStatus.OK);
     }
     @RequestMapping(value = "/deleteCustomer/{id}",method = RequestMethod.DELETE)
     public ResponseEntity<Void> deleteCustomer(@PathVariable int id) {
         customerService.deleteCustomer(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
-}
+
+    }
+

@@ -3,11 +3,13 @@ package com.inventory.Erp.model;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
-
+import lombok.NoArgsConstructor;
+import org.hibernate.annotations.NaturalId;
 import java.util.Date;
 
 @Entity
 @Table(name = "Employees")
+@NoArgsConstructor
 @Data
 public class Employee {
     @Id
@@ -22,6 +24,7 @@ public class Employee {
     @NotNull
     private boolean status;
     @NotNull
+    @NaturalId
     private String email;
     @NotNull
     private String gender;
@@ -33,5 +36,4 @@ public class Employee {
     private String contractType;
     @NotNull
     private Date employmentDate;
-
 }

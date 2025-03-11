@@ -41,7 +41,7 @@ public class LoanService {
         changedetails.setLoanName(updateLoans.getLoanName());
         updateLoans.setLoanType(updateLoans.getLoanType());
         updateLoans.setLoanName(updateLoans.getLoanName());
-        loanRepository.save(updateLoans);
+       return loanRepository.save(updateLoans);
     }
 
 }

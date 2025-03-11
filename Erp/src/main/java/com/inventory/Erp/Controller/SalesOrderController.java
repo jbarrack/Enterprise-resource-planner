@@ -1,5 +1,6 @@
 package com.inventory.Erp.Controller;
 
+import com.inventory.Erp.ExeceptionsHandler.ResourceNotFoundException;
 import com.inventory.Erp.Services.SalesOrderService;
 import com.inventory.Erp.model.SalesOrder;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,8 +29,8 @@ public class SalesOrderController {
     }
     @RequestMapping(value = "/createNewOrders",method = RequestMethod.POST)
     public ResponseEntity<SalesOrder> createNewSalesOrder(@RequestBody SalesOrder salesOrder) {
-        SalesOrder creatingNewSalesOrder = salesOrderService.createSalesOrder(salesOrder);
-        return new ResponseEntity<>(creatingNewSalesOrder, HttpStatus.CREATED);
+            SalesOrder creatingNewSalesOrder = salesOrderService.createSalesOrder(salesOrder);
+            return new ResponseEntity<>(creatingNewSalesOrder, HttpStatus.CREATED);
     }
     @RequestMapping(value = "/salesOrder/{id}",method = RequestMethod.PUT)
     public ResponseEntity<SalesOrder> updateSalesOrder(@PathVariable int id, @RequestBody SalesOrder salesOrderDetails) {

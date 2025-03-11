@@ -4,6 +4,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Date;
 
@@ -18,26 +19,20 @@ public class Users {
     private String contact;
     private boolean active;
     private Date locatdate;
+    private Role role;
 
-    private Users(){
-        super();
-    }
-
-    public Users(String username, String email, String password, String contact, boolean active, Date locatdate) {
+    public Users(String username, String email, String password, String contact, boolean active, Date locatdate, Role role) {
         this.username = username;
         this.email = email;
         this.password = password;
         this.contact = contact;
         this.active = active;
         this.locatdate = locatdate;
+        this.role = role;
     }
 
-    public int getUserId() {
-        return userId;
-    }
-
-    public void setUserId(int userId) {
-        this.userId = userId;
+    private Users(){
+        super();
     }
 
     public String getUsername() {
@@ -48,12 +43,12 @@ public class Users {
         this.username = username;
     }
 
-    public String getEmail() {
-        return email;
+    public int getUserId() {
+        return userId;
     }
 
-    public void setEmail(String email) {
-        this.email = email;
+    public void setUserId(int userId) {
+        this.userId = userId;
     }
 
     public String getPassword() {
@@ -86,5 +81,21 @@ public class Users {
 
     public void setLocatdate(Date locatdate) {
         this.locatdate = locatdate;
+    }
+
+    public Role getRole() {
+        return role;
+    }
+
+    public void setRole(Role role) {
+        this.role = role;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 }

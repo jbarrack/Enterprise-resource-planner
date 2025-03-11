@@ -1,5 +1,8 @@
 package com.inventory.Erp.Services;
 
+import com.inventory.Erp.ExeceptionsHandler.CustomerAlreadyExistException;
+import com.inventory.Erp.ExeceptionsHandler.CustomerDetailsNotFound;
+import com.inventory.Erp.ExeceptionsHandler.ResourceNotFoundException;
 import com.inventory.Erp.Repository.CustomerRepository;
 import com.inventory.Erp.model.Customer;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,38 +16,34 @@ import java.util.Optional;
 public class CustomerService {
     @Autowired
     private CustomerRepository customerRepository;
-
     public CustomerService(CustomerRepository customerRepository) {
         this.customerRepository = customerRepository;
     }
-
     public List<Customer> getAllCustomers() {
+        for(Customer i : getAllCustomers()){
+            System.out.println(i);
+        }
         return customerRepository.findAll();
     }
-
     public List<Customer> getActiveCustomers() {
         return customerRepository.findByActive(true);
     }
-
     public List<Customer> getInactiveCustomers() {
         return customerRepository.findByActive(false);
     }
-
     public Customer getCustomerById(int id) {
-        return customerRepository.findById(id).orElseThrow(() -> new RuntimeException("Customer with id " + id + " not found"));
+        return customerRepository.findById(id).orElseThrow(() -> new CustomerDetailsNotFound("Customer with id " + id + " not found"));
     }
-
     public Customer createNewCustomer(Customer customer) {
         Optional<Customer> existingCustomerByEmail = customerRepository.findCustomerByEmail(customer.getEmail());
         Optional<Customer> existingCustomerByContact = customerRepository.findCustomerByContact(customer.getContact());
-        if (existingCustomerByEmail.isPresent()) {
-            throw new RuntimeException("Email is already used by another Entity.");
+        if (existingCustomerByEmail.isPresent() || existingCustomerByContact.isPresent()){
+            throw new CustomerAlreadyExistException("Details Already exist!");
         }
-        if (existingCustomerByContact.isPresent()) {
-            throw new RuntimeException("Contact is already used by another Customer.");
-        }
-
         customer.setCreatedAt(customer.getCreatedAt());
+        customer.setAddress(customer.getAddress());
+        customer.setPhone(customer.getPhone());
+        customer.setActive(false);
         customer.setName(customer.getName());
         customer.setEmail(customer.getEmail());
         customer.setContact(customer.getContact());
@@ -54,38 +53,34 @@ public class CustomerService {
         customer.setCreatedAt(new Timestamp(System.currentTimeMillis()));
         return customerRepository.save(customer);
     }
-    public Customer updateCustomer(int id, Customer customerDetails) {
-        Optional<Customer> checkifCustomerExist = customerRepository.findById(id);
-        if (!checkifCustomerExist.isPresent()) {
-            throw new RuntimeException("No Record found");
+    public Customer updateCustomer(int id, Customer customerDetails) throws Exception {
+        Customer existingCustomer = customerRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Customer with ID " + id + " not found"));
+        if (!existingCustomer.getEmail().equals(customerDetails.getEmail())) {
+            Optional<Customer> emailExists = customerRepository.findCustomerByEmail(customerDetails.getEmail());
+            if (emailExists.isPresent() && emailExists.get().getCustomerId() != id) {
+                throw new IllegalArgumentException("Email already in use by another customer");
+            }
         }
-        Customer existingCustomer = checkifCustomerExist.get();
-        Optional<Customer> existingCustomerByEmail = customerRepository.findCustomerByEmail(customerDetails.getEmail());
-        if (existingCustomerByEmail.isPresent() && existingCustomerByEmail.get().getCustomerId() != existingCustomer.getCustomerId()) {
-            throw new RuntimeException("Email is already used by another Entity.");
+        if (!existingCustomer.getContact().equals(customerDetails.getContact())) {
+            Optional<Customer> contactExists = customerRepository.findCustomerByContact(customerDetails.getContact());
+            if (contactExists.isPresent() && contactExists.get().getCustomerId() != id) {
+                throw new IllegalArgumentException("Contact already in use by another customer");
+            }
         }
-        Optional<Customer> existingCustomerByContact = customerRepository.findCustomerByContact(customerDetails.getContact());
-        if (existingCustomerByContact.isPresent() && existingCustomerByContact.get().getCustomerId() != existingCustomer.getCustomerId()) {
-            throw new RuntimeException("Contact is already used by another Customer.");
-        }
-        existingCustomer.setActive(true);
-        existingCustomer.setContact(customerDetails.getContact());
-        existingCustomer.setEmail(customerDetails.getEmail());
+        existingCustomer.setActive(customerDetails.isActive());
         existingCustomer.setName(customerDetails.getName());
-        existingCustomer.setKraPIN(customerDetails.getKraPIN());
-        existingCustomer.setCreatedAt(new Timestamp(System.currentTimeMillis()));
+        existingCustomer.setEmail(customerDetails.getEmail());
+        existingCustomer.setContact(customerDetails.getContact());
         existingCustomer.setAddress(customerDetails.getAddress());
-        existingCustomer.setSalesRepresentative(customerDetails.getSalesRepresentative());
-        existingCustomer.setPhone(customerDetails.getPhone());
+        existingCustomer.setKraPIN(customerDetails.getKraPIN());
+        existingCustomer.setLocalDate(customerDetails.getLocalDate());
         return customerRepository.save(existingCustomer);
     }
-
     public void deleteCustomer(int id) {
-        Customer customer = customerRepository.findById(id).orElseThrow(() -> new RuntimeException("Customer with id " + id + " not found"));
-        customer.setActive(false);
-        customerRepository.save(customer);
+        customerRepository.findById(id).ifPresentOrElse(customerRepository:: delete,()->{
+            throw new ResourceNotFoundException("Customer not found");
+        });
     }
-
     public List<Customer> getCustomersByActiveStatus(boolean active) {
         List<Customer> findingActiveCustomer = customerRepository.findByActive(active);
         return findingActiveCustomer;
