@@ -15,14 +15,18 @@ import java.util.Optional;
 public class QuotationController {
     @Autowired
     private SalesQuotationService quotationService;
-
     public QuotationController(SalesQuotationService quotationService) {
         this.quotationService = quotationService;
     }
 
-    @GetMapping
+    @RequestMapping(value = "/quaotationLists", method = RequestMethod.GET)
     public ResponseEntity<List<SalesQuotation>> getAllQuotations() {
-        return new ResponseEntity<>(quotationService.getAllQuotations(), HttpStatus.OK);
+        List<SalesQuotation> salesQuotationList = quotationService.getAllQuotations();
+        for(SalesQuotation i : salesQuotationList){
+            return new ResponseEntity<>(salesQuotationList, HttpStatus.OK);
+        }
+        //return new ResponseEntity<>(salesQuotationList, HttpStatus.OK);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
     @GetMapping("/{id}")
     public ResponseEntity<SalesQuotation> getQuotationById(@PathVariable int id) {
@@ -30,12 +34,15 @@ public class QuotationController {
     }
     @PostMapping
     public ResponseEntity<SalesQuotation> createNewQuotation(@RequestBody SalesQuotation quotation) {
-        return new ResponseEntity<>(quotationService.createNewQuotation(quotation), HttpStatus.CREATED);
+        SalesQuotation salesQuoataion = quotationService.createNewQuotation(quotation);
+        return new ResponseEntity<>(salesQuoataion, HttpStatus.CREATED);
     } @PutMapping("/{id}")
     public ResponseEntity<SalesQuotation> updateQuotation(@PathVariable int id, @RequestBody SalesQuotation quotationDetails) {
-        return new ResponseEntity<>(quotationService.updateQuotation(id, quotationDetails), HttpStatus.OK);
+        SalesQuotation updatedSalesQuoation = quotationService.updateQuotation(id,quotationDetails);
+        return new ResponseEntity<>(updatedSalesQuoation, HttpStatus.OK);
     }
-    @DeleteMapping("/{id}") public ResponseEntity<Void> deleteQuotation(@PathVariable int id) {
+    @RequestMapping(value = "/saleQuoation/{id}", method=RequestMethod.DELETE)
+    public ResponseEntity<Void> deleteQuotation(@PathVariable int id) {
         quotationService.deleteQuotation(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }

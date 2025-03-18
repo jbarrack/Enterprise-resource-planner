@@ -1,5 +1,8 @@
 package com.inventory.Erp.Services;
 
+import com.inventory.Erp.ExeceptionsHandler.CustomerDetailsNotFound;
+import com.inventory.Erp.ExeceptionsHandler.ResourceNotFoundException;
+import com.inventory.Erp.ExeceptionsHandler.SupplierDetailsAlreadyExist;
 import com.inventory.Erp.Repository.SupplierRepository;
 import com.inventory.Erp.model.Supplier;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,13 +26,13 @@ public class SupplierService {
         return supplierRepository.findAll();
     }
     public Supplier getSupplierById(int id) {
-        return supplierRepository.findById(id).orElseThrow(() -> new RuntimeException("Supplier with id " + id + " not found"));
+        return supplierRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Supplier with id " + id + " not found"));
     }
 
     public Supplier createNewSupplier(Supplier supplier) {
         Optional<Supplier> checkkrapin = supplierRepository.findSupplierByKraPIN(supplier.getKraPIN());
         if(checkkrapin.isPresent()){
-            throw new IllegalArgumentException("Supplier exist");
+            throw new SupplierDetailsAlreadyExist("Supplier Already Exist!");
         }
         supplier.setCreatedAt(new Timestamp(System.currentTimeMillis()));
         supplier.setName(supplier.getName());
@@ -44,11 +47,14 @@ public class SupplierService {
         return supplierRepository.save(supplier);
     }
     public Supplier updateSupplier(int id, Supplier supplierDetails) {
-        Optional<Supplier> updateSupplier = supplierRepository.findById(id);
-        if(!updateSupplier.isPresent()){
+        Optional<Supplier> updateSupplierDetails = supplierRepository.findById(id);
+        if(!updateSupplierDetails.isPresent()){
             throw new RuntimeException("Record not found");
         }
-        Supplier supplier = updateSupplier.get();
+        Supplier supplier = updateSupplierDetails.get();
+        supplier.setRepresentative(supplierDetails.getRepresentative());
+        supplier.setLocation(supplierDetails.getLocation());
+        supplier.setCreatedAt(supplierDetails.getCreatedAt());
         supplier.setName(supplierDetails.getName());
         supplier.setAddress(supplierDetails.getAddress());
         supplier.setEmail(supplierDetails.getEmail());

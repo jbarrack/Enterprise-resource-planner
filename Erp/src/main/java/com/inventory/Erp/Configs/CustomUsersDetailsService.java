@@ -13,6 +13,10 @@ public class CustomUsersDetailsService implements UserDetailsService {
     @Autowired
     private UserRepository userRepository;
 
+    public CustomUsersDetailsService(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
+
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         Users user = userRepository.findUserByUsername(username);
